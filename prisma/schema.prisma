@@ -1,0 +1,58 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Product {
+  id            Int          @id @default(autoincrement())
+  category_id   Int?
+  name          String
+  price         Float
+  description   String?
+  unit_in_stock Int
+  picture       String?
+  Category      Category?    @relation(fields: [category_id], references: [id])
+  OrderItems    OrderItem[]  // เพิ่มฟิลด์สำหรับอ้างกลับไปยัง OrderItem
+}
+
+model Category {
+  id       Int       @id @default(autoincrement())
+  name     String
+  products Product[]
+}
+
+model User {
+  id       Int    @id @default(autoincrement())
+  username String
+  email    String @unique
+  password String
+  picture  String?
+}
+
+model Order {
+  id          Int         @id @default(autoincrement())
+  customerId  Int
+  Customer    Customer    @relation(fields: [customerId], references: [id])
+  OrderItems  OrderItem[]
+  createdAt   DateTime    @default(now())
+}
+
+model OrderItem {
+  id        Int      @id @default(autoincrement())
+  orderId   Int
+  productId Int
+  quantity  Int
+  Order     Order     @relation(fields: [orderId], references: [id])
+  Product   Product   @relation(fields: [productId], references: [id])
+}
+
+model Customer {
+  id       Int    @id @default(autoincrement())
+  name     String
+  email    String
+  Orders   Order[]
+}
