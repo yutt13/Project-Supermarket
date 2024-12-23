@@ -11,6 +11,8 @@ const productRoute = require('./routes/product.route');
 const categoriesRoute = require('./routes/categories.route');
 const userRoute = require('./routes/user.route');
 const registerRoute = require('./routes/register.route');
+const orderRoute = require('./routes/order.route');
+
 // CORS cross origin resource sharing
 app.use(cors());
 app.use('/images', express.static('images'));
@@ -27,6 +29,7 @@ app.use("/products", productRoute);
 app.use("/categories", categoriesRoute);
 app.use("/users", userRoute);
 app.use("/register", registerRoute);
+app.use("/order", orderRoute);
 app.listen(port, () => {
     console.log("App started at port: " + port);
 });
