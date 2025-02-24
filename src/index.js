@@ -9,8 +9,7 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const productRoute = require('./routes/product.route');
 const categoriesRoute = require('./routes/categories.route');
-const userRoute = require('./routes/user.route');
-const registerRoute = require('./routes/register.route');
+const customerRoute = require('./routes/customer.route');
 const orderRoute = require('./routes/order.route');
 
 // CORS cross origin resource sharing
@@ -27,9 +26,8 @@ app.get("/", (req, res)=>{
   // ใช้ productRoute เมื่อ request ขึ่นต้นด้วย /products
 app.use("/products", productRoute);
 app.use("/categories", categoriesRoute);
-app.use("/users", userRoute);
-app.use("/register", registerRoute);
-app.use("/order", orderRoute);
+app.use("/customers", customerRoute);
+app.use("/orders", orderRoute);
 app.listen(port, () => {
     console.log("App started at port: " + port);
 });

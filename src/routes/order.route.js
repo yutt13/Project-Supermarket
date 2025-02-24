@@ -5,7 +5,8 @@ const controller = require('../controllers/order.controller');
 // define routes here
 
 app.get("/", controller.getOrders);
-app.get("/user/:id",controller.getOrderById);
-app.post("/user",controller.createOrder);
+app.post("/",controller.createOrder);
+app.put("/:id", controller.updateOrderStatus);
+app.delete("/:id", controller.deleteOrder);
 
 module.exports = app;

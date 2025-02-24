@@ -3,81 +3,62 @@ const prisma = new PrismaClient();
 
 exports.createOrder = async (req, res) => {
     try {
-      const { customerId, products } = req.body; // รับข้อมูลลูกค้าและสินค้า
-      if (!customerId || !products || !products.length) {
-        return res.status(400).json({ message: 'ข้อมูลไม่ครบถ้วน' });
-      }
-  
-      // สร้างออเดอร์ใหม่
-      const order = await prisma.order.create({
-        data: {
-          customerId: parseInt(customerId),
-          OrderItems: {
-            create: products.map((product) => ({
-              productId: parseInt(product.productId),
-              quantity: product.quantity,
-            })),
-          },
-        },
-        include: {
-          OrderItems: true,
-        },
-      });
-  
-      res.status(201).json(order);
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: 'เกิดข้อผิดพลาดในการสร้างออเดอร์' });
-    }
-  };
-  
-  // ดึงข้อมูลออเดอร์ทั้งหมด
-  exports.getOrders = async (req, res) => {
-    try {
-      const orders = await prisma.order.findMany({
-        include: {
-          Customer: true, // รวมข้อมูลลูกค้า
-          OrderItems: {
-            include: {
-              Product: true, // รวมข้อมูลสินค้า
+        const { customerId, orderItems } = req.body;
+
+        const newOrder = await prisma.order.create({
+            data: {
+                customerId,
+                OrderItems: {
+                    create: orderItems.map(item => ({
+                        productId: item.productId,
+                        quantity: item.quantity,
+                    })),
+                },
             },
-          },
-        },
-      });
-  
-      res.json(orders);
+            include: { OrderItems: true },
+        });
+
+        res.status(201).json(newOrder);
     } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: 'เกิดข้อผิดพลาดในการดึงข้อมูลออเดอร์' });
+        res.status(500).json({ message: "Error creating order", error });
     }
-  };
-  
-  // ดึงข้อมูลออเดอร์ตาม ID
-  exports.getOrderById = async (req, res) => {
-    const { id } = req.params;
+};
+
+exports.getOrders = async (req, res) => {
     try {
-      const order = await prisma.order.findUnique({
-        where: {
-          id: parseInt(id),
-        },
-        include: {
-          Customer: true,
-          OrderItems: {
+        const orders = await prisma.order.findMany({
             include: {
-              Product: true,
+                Customer: true,
+                OrderItems: {
+                    include: { Product: true },
+                },
             },
-          },
-        },
-      });
-  
-      if (!order) {
-        return res.status(404).json({ message: 'ไม่พบข้อมูลออเดอร์นี้' });
-      }
-  
-      res.json(order);
+        });
+        res.json(orders);
     } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: 'เกิดข้อผิดพลาดในการดึงข้อมูลออเดอร์' });
+        res.status(500).json({ message: "Error fetching orders", error });
     }
-  };
-  
+};
+
+exports.updateOrderStatus = async (req, res) => {
+    try {
+        const { status } = req.body;
+        const updatedOrder = await prisma.order.update({
+            where: { id: req.params.id },
+            data: { status },
+        });
+
+        res.json(updatedOrder);
+    } catch (error) {
+        res.status(500).json({ message: "Error updating order", error });
+    }
+};
+
+exports.deleteOrder = async (req, res) => {
+    try {
+        await prisma.order.delete({ where: { id: req.params.id } });
+        res.json({ message: "Order deleted successfully" });
+    } catch (error) {
+        res.status(500).json({ message: "Error deleting order", error });
+    }
+};
