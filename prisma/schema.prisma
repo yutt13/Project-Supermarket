@@ -8,15 +8,16 @@ datasource db {
 }
 
 model Product {
-  id            String      @id @default(auto()) @map("_id") @db.ObjectId
-  category_id   String?     @db.ObjectId
-  name          String
-  price         Float
-  description   String?
-  stock Int
-  picture       String?
-  Category      Category? @relation(fields: [category_id], references: [id], name: "CategoryToProduct")
-  OrderItems    OrderItem[]  
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  category_id String?   @db.ObjectId
+  name        String
+  price       Float
+  description String?
+  stock       Int
+  picture     String?
+  Category    Category? @relation(fields: [category_id], references: [id], name: "CategoryToProduct")
+  OrderItems  OrderItem[]
+  CartItems   CartItem[] // เพิ่มความสัมพันธ์กลับไปยัง CartItem
 }
 
 model Category {
@@ -26,47 +27,48 @@ model Category {
 }
 
 model Order {
-  id          String    @id @default(auto()) @map("_id") @db.ObjectId
-  customerId  String    @db.ObjectId
-  customer    Customer  @relation(fields: [customerId], references: [id])
-  OrderItems  OrderItem[]
-  createdAt   DateTime  @default(now())
+  id         String     @id @default(auto()) @map("_id") @db.ObjectId
+  customerId String     @db.ObjectId
+  customer   Customer   @relation(fields: [customerId], references: [id], name: "CustomerToOrder")
+  cartId     String?    @db.ObjectId
+  cart       Cart?      @relation(fields: [cartId], references: [id], name: "CartToOrder")
+  OrderItems OrderItem[]
+  createdAt  DateTime   @default(now())
+  status     String     @default("Pending")
 }
 
 model OrderItem {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  orderId   String   @db.ObjectId
-  productId String   @db.ObjectId
+  id        String  @id @default(auto()) @map("_id") @db.ObjectId
+  orderId   String  @db.ObjectId
+  productId String  @db.ObjectId
   quantity  Int
-  Order     Order    @relation(fields: [orderId], references: [id])
-  Product   Product  @relation(fields: [productId], references: [id])
+  Order     Order   @relation(fields: [orderId], references: [id])
+  Product   Product @relation(fields: [productId], references: [id])
 }
 
 model Customer {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  name        String
-  email       String   @unique
-  password    String
-  orders      Order[]  
-  points      Int      @default(0)
-  purchases   Purchase[]
-  reviews     Review[]
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  email     String    @unique
+  password  String
+  role      String    @default("USER")
+  orders    Order[]   @relation("CustomerToOrder")
+  cart      Cart?     // เพิ่มความสัมพันธ์กลับไปยัง Cart
 }
 
-model Purchase {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
-  customerId String   @db.ObjectId
-  Customer   Customer @relation(fields: [customerId], references: [id])
-  totalAmount Float
-  createdAt   DateTime @default(now())
+model Cart {
+  id         String     @id @default(auto()) @map("_id") @db.ObjectId
+  customerId String     @db.ObjectId @unique
+  customer   Customer   @relation(fields: [customerId], references: [id])
+  items      CartItem[]
+  orders     Order[]    @relation("CartToOrder") // เพิ่มความสัมพันธ์กับ Order
 }
 
-model Review {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
-  customerId String   @db.ObjectId
-  Customer   Customer @relation(fields: [customerId], references: [id])
-  productId  String   @db.ObjectId
-  rating     Int
-  comment    String
-  createdAt  DateTime @default(now())
+model CartItem {
+  id        String  @id @default(auto()) @map("_id") @db.ObjectId
+  cartId    String  @db.ObjectId
+  productId String  @db.ObjectId
+  quantity  Int
+  cart      Cart    @relation(fields: [cartId], references: [id])
+  product   Product @relation(fields: [productId], references: [id])
 }
