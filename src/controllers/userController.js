@@ -47,7 +47,7 @@ const updateUser = async (req, res) => {
 
 // 4. ค้นหาสินค้า/เรียกดูสินค้า
 const searchProducts = async (req, res) => {
-  const { keyword } = req.query;
+  const { keyword } = req.body;
   try {
     const products = await prisma.product.findMany({
       where: { name: { contains: keyword, mode: 'insensitive' } },
